@@ -1,14 +1,17 @@
 pipeline {
 
     agent any
-/*
+
 	tools {
-        maven "maven3"
+        maven "MAVEN3"
+        jdk "OracleJDK17"
     }
-*/
+
     environment {
-        registry = "imranvisualpath/vproappdock"
+        registry = 'sanan3946/vprofile'
         registryCredential = 'dockerhub'
+        SONARSCANNER = 'sonarscanner'
+        SONARSERVER = 'sonar-pro'
     }
 
     stages{
@@ -52,7 +55,7 @@ pipeline {
         stage('Building image') {
             steps{
               script {
-                dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                dockerImage = docker.build registry + ":v$BUILD_NUMBER"
               }
             }
         }
@@ -61,7 +64,7 @@ pipeline {
           steps{
             script {
               docker.withRegistry( '', registryCredential ) {
-                dockerImage.push("$BUILD_NUMBER")
+                dockerImage.push("v$BUILD_NUMBER")
                 dockerImage.push('latest')
               }
             }
@@ -70,18 +73,18 @@ pipeline {
 
         stage('Remove Unused docker image') {
           steps{
-            sh "docker rmi $registry:$BUILD_NUMBER"
+            sh "docker rmi $registry:v$BUILD_NUMBER"
           }
         }
 
         stage('CODE ANALYSIS with SONARQUBE') {
 
             environment {
-                scannerHome = tool 'mysonarscanner4'
+                scannerHome = tool "${SONARSCANNER}"
             }
 
             steps {
-                withSonarQubeEnv('sonar-pro') {
+                withSonarQubeEnv("${SONARSERVER}") {
                     sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
                    -Dsonar.projectName=vprofile-repo \
                    -Dsonar.projectVersion=1.0 \
@@ -98,9 +101,9 @@ pipeline {
             }
         }
         stage('Kubernetes Deploy') {
-	  agent { label 'KOPS' }
+            agent { label 'KOPS' }
             steps {
-                    sh "helm upgrade --install --force vproifle-stack helm/vprofilecharts --set appimage=${registry}:${BUILD_NUMBER} --namespace prod"
+                    sh "helm upgrade --install --force vproifle-stack helm/vprofilecharts --set appimage=${registry}:v${BUILD_NUMBER} --namespace prod"
             }
         }
 
