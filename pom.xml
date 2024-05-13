@@ -208,10 +208,10 @@
 		
         </plugins>
     </build>
-	<repositories>
+	<!-- <repositories>
     <repository>
       <id>${NEXUS_GRP_REPO}</id>
       <url>http://${NEXUS_IP}:${NEXUS_PORT}/repository/${NEXUS_GRP_REPO}/</url>
     </repository>
-  </repositories>
+  </repositories> -->
 </project>
