@@ -11,7 +11,7 @@ pipeline {
         registry = 'sanan3946/vprofile'
         registryCredential = 'dockerhub'
         SONARSCANNER = 'sonarscanner'
-        SONARSERVER = 'sonar-pro'
+        SONARSERVER = 'sonar-prod'
     }
 
     stages{
